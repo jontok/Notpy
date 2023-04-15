@@ -6,8 +6,6 @@ from pathlib import Path
 import os
 
 # Temp VArs
-work_dir = "/home/jt/Documents/Projects/Notpy/notpyFiles/"
-file_path = work_dir + 'README.md'
 config_file = str(Path.home()) + "/.config/notpy/config.json"
 
 def showHelp():

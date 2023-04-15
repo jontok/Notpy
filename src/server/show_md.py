@@ -16,7 +16,8 @@ def showRenderedMarkdown(work_dir,config):
     listPages(config, notebook_id)
     path_relativ = getNotebookPage(config, notebook_id)
     path = work_dir + path_relativ
-    print(os.path.exists(path))
+    
+    print(path)
     if os.path.exists(path):
         createHTML(work_dir, path)
         webbrowser.open_new_tab(work_dir + "/tmp/render.html")
