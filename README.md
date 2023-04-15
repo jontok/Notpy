@@ -17,11 +17,8 @@ def main():
 ```
 
 ## To-Do's
-
-- Create note book
-    - create folder in aplication dir /home/{users_choise}
-    - prompt: "Name of note book"
-        - check if exists
+- 
+- create page from edit options
 - Scan on App Startup
 - Borwser Select (Firefox, Chrome, chromium)
 - Render from kiosk window

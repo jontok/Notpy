@@ -6,7 +6,6 @@ base_config = {
     "paths": {
         "homeDir": "",
         "notebookDir": "/Notpy"
-        "configDir" "" 
     },
     "notebooks": [
         {
@@ -26,7 +25,14 @@ base_config = {
 
 config = {}
 
-def getConfigFile(path, config_file):
+def getConfigFile(config_file):
+    if os.path.exists(config_file):        
+        with open(config_file, "rb") as f:
+            json_data = json.load(f)
+            f.close()
+            return json_data
+
+def initConfigFile(path, config_file):
     if not os.path.exists(path):
         os.mkdir(path)
     if not os.path.exists(config_file):
@@ -34,23 +40,28 @@ def getConfigFile(path, config_file):
             json.dump(base_config, f)
             f.close()        
     with open(config_file, "rb") as f:
-        config = json.load(f)
+        json_data = json.load(f)
         f.close()
-        #return config
+        return json_data
 
 def setConfigFile(config_file, config):
     with open(config_file, "r+") as f:
-        print(config)
-
+        f.seek(0)
         json.dump(config, f)
         f.close()
+
+def getDefaultPage():
+    with open("./README.md", "r") as readme:
+        default_md = readme.read()
+        return default_md
 
 def setupNotpy(config_file, config):
     
     homeDir = str(input("home directory (default: /home/$USER)"))
     config["paths"]["homeDir"] = homeDir
     if homeDir == "":
-        config["paths"]["homeDir"] = Path.home()
+        
+        config["paths"]["homeDir"] = str(Path.home())
     
     print(config["paths"]["homeDir"])
 
@@ -64,18 +75,21 @@ def setupNotpy(config_file, config):
         os.mkdir(notebookPath)
     print(config["paths"]["notebookDir"])
 
-    defaultBook = str(input("Do you want to create the default notebook (default: yes) y/n"))
+    defaultBook = str(input("Do you want to create the default notebook (default: yes) y/n: "))
     match defaultBook:
-        case "y" | "yes":
+        case "y" | "yes" | "":
             defaultNotebookDir = str(notebookPath) + "/" + str(config["notebooks"][0]["name"])
             if not os.path.exists(defaultNotebookDir):
                 os.mkdir(defaultNotebookDir)
             defaultPagePath = defaultNotebookDir + "/" + config["notebooks"][0]["pages"][0]["name"]
             if not os.path.exists(defaultPagePath):
                 with open(defaultPagePath, "x") as defaultPage:
+                    defaultPage.write(getDefaultPage())
                     return "done"
         case "n" | "no":
             return "done"
+        case _:
+            print ("Not a valid value")
 
     config["setup"] = True
     setConfigFile(config_file, config)
@@ -86,13 +100,16 @@ def editConfig():
     home = str(Path.home())
     path = home + "/.config/notpy"
     config_file = path + "/config.json"
-    config = getConfigFile(path,config_file)
+    config = initConfigFile(path,config_file)
     if config["setup"] != False:
-        print(config["setup"])
+        reconfigure = str(input("Want to reconfigure Notpy? (Y/n)"))
+        match reconfigure:
+            case "y" | "Y" | "yes":
+                setupNotpy(config_file, config)
+            case "n" | "no":
+                print("Skipping")
+            case _:
+                print("Not a valid value")
     else:
         print(config["paths"]["homeDir"])
         setupNotpy(config_file, config)
-
-
-    
-

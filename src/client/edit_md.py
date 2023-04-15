@@ -1,9 +1,13 @@
 from os import system as sys
-from client.show_md import createHTML
+from server.show_md import createHTML
+from client.notebook import listNotebook, listPages, getNotebookPage
 
-def editFile(work_dir):
-    file = str(input("file name: "))
-    path = work_dir + file + ".md"
+def editFile(config,work_dir):
+    listNotebook(config)
+    notebook_id = input("Select a notebook: ")
+    listPages(config, notebook_id)
+    path_relativ = getNotebookPage(config, notebook_id)
+    path = work_dir + path_relativ
     sys("nvim " + path)
     createHTML(work_dir, path)
     
