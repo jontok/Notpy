@@ -17,7 +17,7 @@ def main():
 ```
 
 ## To-Do's
-- 
+- CLI Commandline Tooling
 - create page from edit options
 - Scan on App Startup
 - Borwser Select (Firefox, Chrome, chromium)

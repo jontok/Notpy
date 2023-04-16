@@ -5,70 +5,124 @@ from pathlib import Path
 
 config_file = str(Path.home()) + "/.config/notpy/config.json"
 
+
 def scanNotebooks():
     print("Scanning for pages and notebooks")
 
+
 def createNotebook(config):
-    notebookDir = str(config["paths"]["homeDir"]) + str(config["paths"]["notebookDir"])
+    notebookDir = str(config["paths"]["homeDir"]) + \
+        str(config["paths"]["notebookDir"])
     name = str(input("Notebook Name: "))
     print(name)
     new_notebook_path = notebookDir + "/" + name
-    if not os.path.exists(new_notebook_path):  
+    if not os.path.exists(new_notebook_path):
         new_notebook = {
             'id': len(config["notebooks"]),
             'name': name,
             'pages': []
         }
         config["notebooks"].append(new_notebook)
-        setConfigFile(config_file,config)
+        setConfigFile(config_file, config)
         os.mkdir(new_notebook_path)
     else:
         print("Notebook " + name + "already exists")
 
+
 def createPage(config):
+
+    listNotebook(config)
+    notebook_id = getUserInput("Select a notebook id: ", "int")
+    listPages(config, notebook_id)
+    page_name = getUserInput("Name your page: ", "str")
+    if page_name[-3:] != ".md":
+        page_name = page_name + ".md"
+    config["notebooks"][notebook_id]["pages"].append(
+        {
+            "id": len(config["notebooks"][notebook_id]["pages"]),
+            "name": page_name
+        }
+    )
+    setConfigFile(config_file, config)
+    file_path = getNotebookPagePath(config, notebook_id, page_name)
+    print(file_path)
+    Path(file_path).touch()
+
     print("Page created")
 
+
+def deleteObjectFromConfig(config, del_object, id):
+    for idx, obj in enumerate(del_object):
+        if obj["id"] == id:
+            del_object.remove(obj)
+            print(del_object)
+        with open(config_file, "w") as f:
+            f.seek(0)
+            json.dump(config, f)
+            f.close()
+
+
 def deletePage(config):
+    notebookDir = getNotebookDirectory(config)
+    listNotebook(config)
+    notebook_id = getUserInput("Select a notebook id: ", "int")
+    listPages(config, notebook_id)
+    page_id = getUserInput("Select a page id: ", "int")
+    relativ_path = getNotebookPage(config, notebook_id, page_id)
+    del_path = notebookDir + relativ_path
+    pages_obj = config['notebooks'][notebook_id]["pages"]
+    confirm_delete = getUserInput("Do you want to delete " + del_path + " (Y/n): ")
+    if os.path.exists(del_path):
+        match confirm_delete:
+            case "y" | "Y":
+                deleteObjectFromConfig(config, pages_obj, page_id)
+                os.remove(del_path)
+            case _:
+                print("Page not deleted")
+    else:
+        print("Page does not exist")
     print("Page deleted")
+
 
 def deleteNotebook(config):
     print("Delete notebook")
-    notebookDir = str(config["paths"]["homeDir"]) + str(config["paths"]["notebookDir"])
+    notebookDir = getNotebookDirectory(config)
     listNotebook(config)
-    notebook = input("Notebook Id: ")
-    if notebook != "":
-        notebook_int = int(notebook)
-        del_notebook = config["notebooks"][notebook_int]["name"]
-        del_path = notebookDir + "/" + del_notebook
-        if os.path.exists(del_path):
-            confirm_delete = str(input("Delete " + del_notebook + " (Y/n) : "))
-            match confirm_delete:
-                case "y" | "Y":
-                    for idx, obj in enumerate(config['notebooks']):
-                        if obj["id"] == notebook_int:
-                            print(notebook)
-                            print(idx)
-                            config["notebooks"].remove(obj)
-                            print(config)
-                        
-                        with open(config_file, "w") as f:
-                            f.seek(0)
-                            json.dump(config, f)
-                            f.close()
+    notebook_id = getUserInput("Notebook Id: ", "int")
+    del_notebook = config["notebooks"][notebook_id]["name"]
+    del_path = notebookDir + "/" + del_notebook
+    if os.path.exists(del_path):
+        confirm_delete = str(input("Delete " + del_notebook + " (Y/n) : "))
+        match confirm_delete:
+            case "y" | "Y":
+                deleteObjectFromConfig(
+                    config, config['notebooks'], notebook_id)
 
-                    os.rmdir(del_path)
-                case _:
-                    print(del_notebook + " was not deleted")
-        else:
-            print("Folder does not exist")
+                os.rmdir(del_path)
+            case _:
+                print(del_notebook + " was not deleted")
+    else:
+        print("Folder does not exist")
+
+
+def getUserInput(prompt, return_type="str"):
+    user_input = input(prompt)
+    if user_input != "":
+        match return_type:
+            case "str":
+                return str(user_input)
+            case "int":
+                return int(user_input)
     else:
         print("Not a valid input")
-    
+
+
 def listNotebook(config):
     print("id" + " | " + "name")
     print("--------")
     for nb in config["notebooks"]:
         print(str(nb["id"]) + "  | " + nb["name"])
+
 
 def listPages(config, notebook_id):
     listNotebook(config)
@@ -80,13 +134,28 @@ def listPages(config, notebook_id):
     else:
         print("Not a valid input")
 
-def getNotebookPage(config, notebook_id):
-    page = input("PAge Id: ")
+
+def getNotebookPage(config, notebook_id, page_id):
     notebook = config["notebooks"][int(notebook_id)]
-    page_path = "/" + notebook["name"] + "/" + notebook["pages"][int(page)]["name"]
-    print(page_path)
-    return str(page_path)
-     
+    page_path = "/" + notebook["name"] + "/" + notebook["pages"][page_id]["name"]
+    return str(page_path.replace(" ", "_"))
+
+
+def getNotebookPagePath(config, notebook_id, page_name):
+    if page_name[-3:] != ".md":
+        page_name = page_name + ".md"
+    home_dir = config["paths"]["homeDir"]
+    nb_home_dir = config["paths"]["notebookDir"]
+    nb_dir = config["notebooks"][notebook_id]["name"].replace(" ", "_")
+
+    full_page_path = home_dir + nb_home_dir + "/" + nb_dir + "/" + page_name
+    return str(full_page_path)
+
+
+def getNotebookDirectory(config):
+    notebookDir = str(config["paths"]["homeDir"]) + \
+        str(config["paths"]["notebookDir"])
+    return notebookDir
 
 
 def notebooks(config_file):
@@ -117,6 +186,7 @@ def notebooks(config_file):
             listPages(config, notebook_id)
         case _:
             print("Not a valid value")
-            
+
+
 # while True:
 #     notebooks(config_file)

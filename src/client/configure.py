@@ -23,9 +23,11 @@ base_config = {
 
 }
 
+default_config_file = str(Path.home()) + "/.config/notpy/config.json"
+
 config = {}
 
-def getConfigFile(config_file):
+def getConfigFile(config_file=default_config_file):
     if os.path.exists(config_file):        
         with open(config_file, "rb") as f:
             json_data = json.load(f)

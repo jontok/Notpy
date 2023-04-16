@@ -1,7 +1,7 @@
 import os
 from server.render_md import *
 from server.read_md import *
-from client.notebook import listNotebook, listPages, getNotebookPage
+from client.notebook import listNotebook, listPages, getNotebookPage, getUserInput
 import webbrowser
 
 def createHTML(work_dir, md_file_path):
@@ -12,9 +12,10 @@ def createHTML(work_dir, md_file_path):
 
 def showRenderedMarkdown(work_dir,config):
     listNotebook(config)
-    notebook_id = input("Select a notebook: ")
+    notebook_id = getUserInput("Select a notebook id: ", "int")
     listPages(config, notebook_id)
-    path_relativ = getNotebookPage(config, notebook_id)
+    page_id = getUserInput("Select a page id: ", "int")
+    path_relativ = getNotebookPage(config, notebook_id, page_id)
     path = work_dir + path_relativ
     
     print(path)
