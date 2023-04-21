@@ -1,11 +1,13 @@
 import os
 import sys
+from pathlib import Path
+sys.path.append((str(Path.home()) + "/.local/lib/python3.10/site-packages/notpy"))
 from modules.edit_md import editFile
-from modules.modules.show_md import showRenderedMarkdown
-from modules.modules.configure import editConfig, getConfigFile
-from modules.modules.notebook import notebooks
-from modules.modules.commandline import cliMain
-from modules.pathlib import Path
+from modules.show_md import showRenderedMarkdown
+from modules.configure import editConfig, getConfigFile
+from modules.notebook import notebooks
+from modules.commandline import cliMain
+
 
 
 def showHelp():
@@ -18,7 +20,6 @@ def main():
     config_file = str(Path.home()) + "/.config/notpy/config.json"
     while True:
         config = getConfigFile(config_file)
-        
         if len(sys.argv) >= 2:
             cliMain(config, sys.argv)
             break

@@ -1,9 +1,9 @@
 import os
 import webbrowser
 from pathlib import Path
-from render_md import renderMarkdown
-from read_md import getCurrentMarkdown
-from notebook import listNotebook, listPages, getNotebookPage, getUserInput
+from modules.render_md import renderMarkdown
+from modules.read_md import getCurrentMarkdown
+from modules.notebook import listNotebook, listPages, getNotebookPage, getUserInput
 
 
 def createHTML(work_dir, md_file_path):

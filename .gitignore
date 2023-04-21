@@ -11,5 +11,3 @@ src/deb_dist
 **/debian**
 __init__.spec
 .gitignore
-MANIFEST.in
-/*.desktop

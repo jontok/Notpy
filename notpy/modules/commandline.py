@@ -1,9 +1,10 @@
 import os
 import shutil
+import pkg_resources
 from pathlib import Path
-from edit_md import editNewFile
-from configure import editConfig, setConfigFile, generatePageObject
-from notebook import (
+from modules.edit_md import editNewFile
+from modules.configure import editConfig, setConfigFile, generatePageObject
+from modules.notebook import (
     getNotebookFromName,
     getPageFromName,
     deleteObjectFromConfig,
@@ -19,11 +20,29 @@ config_file = str(Path.home()) + "/.config/notpy/config.json"
 
 
 def cliShowHelp():
-    print(str(cliShowHelp.__name__) + ' was not found!')
+    print("NotPy")
+    print()
+    print("Usage: notpy [options] [arguments]")
+    print()
+    print("Run NotPy: A simple note-taking CLI tool")
+    print()
+    print("Options:")
+    print("  -h, --help         Print this usage message")
+    print("  -v, --version      Print the version")
+    print()
+    print("Commands:")
+    print("  The following commands are available:")
+    print("  ls nb                          - list all notebooks")
+    print("  ls pg [notebook]               - list all pages in a notebook")
+    print("  edit pg [notebook] [page]      - edit a page in a notebook")
+    print("  create nb [notebook]           - create a new notebook")
+    print("  create pg [notebook] [page]    - create a new page in a notebook")
+    print("  delete nb [notebook]           - delete a notebook")
+    print("  delete pg [notebook] [page]    - delete a page from a notebook")
 
 
 def cliListMethod(config, args):
-    if len(args) <= 3:
+    if len(args) <= 2:
         print(
             "Please use one of the options: " +
             "'notpy ls nb' or 'notpy ls pg [notebook]'"
@@ -197,13 +216,15 @@ def cliMain(config, args):
             editConfig()
         case "ls":
             cliListMethod(config, args)
-        case "ed":
+        case "edit":
             cliEditMethod(config, args)
         case "create":
             cliCreateMethod(config, args)
-        case "del":
+        case "delete":
             cliDeleteMethod(config, args)
         case "help" | "-h" | "--help":
             cliShowHelp()
+        case "version" | "-v" | "--version":
+            print(f"Notpy version {pkg_resources.get_distribution('notpy').version}")
         case _:
             print("Not a vaild argument")

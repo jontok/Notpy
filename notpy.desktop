@@ -1,0 +1,9 @@
+[Desktop Entry]
+Version=0.0.1
+Type=Application
+Name=Notpy
+GenericName=Note-taking app
+Comment=A simple command-line note-taking app
+Exec=x-terminal-emulator /bin/bash -c "notpy"
+Terminal=true
+Categories=Utility;

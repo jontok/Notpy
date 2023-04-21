@@ -1,7 +1,7 @@
 import os
 from os import system
-from notebook import listNotebook, listPages, getNotebookPage, getUserInput, createNotebook, createPage
-from show_md import createHTML
+from modules.notebook import listNotebook, listPages, getNotebookPage, getUserInput, createNotebook, createPage
+from modules.show_md import createHTML
 
 def editNewFile(file_path):
     parts = file_path.rsplit("/", 2)  # split by "/" from right to left, up to 2 times
