@@ -1,13 +1,5 @@
 **/__pycache__
 /env
-/notpyFiles
-/deb_dist/
 /dist/
 notpy.egg-info
-notpy-0.*
-notpy.spec
-src/deb_dist
-/build**
-**/debian**
-__init__.spec
 .gitignore
