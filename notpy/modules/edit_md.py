@@ -1,10 +1,14 @@
+import os
 from os import system
-from server.show_md import createHTML
-from client.notebook import listNotebook, listPages, getNotebookPage, getUserInput, createNotebook, createPage
+from notebook import listNotebook, listPages, getNotebookPage, getUserInput, createNotebook, createPage
+from show_md import createHTML
 
 def editNewFile(file_path):
-    system("nvim " + path)
-    createHTML(work_dir, path)
+    parts = file_path.rsplit("/", 2)  # split by "/" from right to left, up to 2 times
+    work_dir = "/".join(parts[:2]) + "/"
+    system("nvim " + file_path)
+    if os.path.exists(file_path):
+        createHTML(work_dir, file_path)
 
 def editFile(config,work_dir):
     create_new_nb = getUserInput("Use existing Notebook default: yes(Y/n): ")

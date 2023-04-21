@@ -1,5 +1,6 @@
 import os
 import json
+import shutil
 from pathlib import Path
 
 base_config = {
@@ -57,6 +58,15 @@ def getDefaultPage():
         default_md = readme.read()
         return default_md
 
+def generatePageObject(config, notebook_id, pg_dir):
+    page_obj = {
+        "id": len(config["notebooks"][notebook_id]["pages"]),
+        "name": pg_dir
+    }
+
+    return page_obj
+
+
 def setupNotpy(config_file, config):
     
     homeDir = str(input("home directory (default: /home/$USER)"))
@@ -65,7 +75,6 @@ def setupNotpy(config_file, config):
         
         config["paths"]["homeDir"] = str(Path.home())
     
-    print(config["paths"]["homeDir"])
 
     notebookDir = str(input("How do you want to call the notebook directory (default: /Notpy) "))
     config["paths"]["notebookDir"] = notebookDir
@@ -75,7 +84,7 @@ def setupNotpy(config_file, config):
     notebookPath = str(config["paths"]["homeDir"]) + str(config["paths"]["notebookDir"])
     if not os.path.exists(notebookPath):
         os.mkdir(notebookPath)
-    print(config["paths"]["notebookDir"])
+    
 
     defaultBook = str(input("Do you want to create the default notebook (default: yes) y/n: "))
     match defaultBook:
@@ -94,6 +103,7 @@ def setupNotpy(config_file, config):
             print ("Not a valid value")
 
     config["setup"] = True
+    shutil.copyfile("/home/jt/Documents/Projects/Notpy/src/modules/style.css", str(Path.home()) + "/.config/notpy/style.css")
     setConfigFile(config_file, config)
     print("Setup finished")
 
@@ -113,5 +123,4 @@ def editConfig():
             case _:
                 print("Not a valid value")
     else:
-        print(config["paths"]["homeDir"])
         setupNotpy(config_file, config)

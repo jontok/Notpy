@@ -1,12 +1,12 @@
-from client.edit_md import *
-from server.show_md import *
-from client.configure import editConfig, getConfigFile
-from client.notebook import notebooks
-from pathlib import Path
 import os
+import sys
+from modules.edit_md import editFile
+from modules.modules.show_md import showRenderedMarkdown
+from modules.modules.configure import editConfig, getConfigFile
+from modules.modules.notebook import notebooks
+from modules.modules.commandline import cliMain
+from modules.pathlib import Path
 
-# Temp VArs
-config_file = str(Path.home()) + "/.config/notpy/config.json"
 
 def showHelp():
     print(
@@ -15,8 +15,14 @@ def showHelp():
         )
 
 def main():
+    config_file = str(Path.home()) + "/.config/notpy/config.json"
     while True:
         config = getConfigFile(config_file)
+        
+        if len(sys.argv) >= 2:
+            cliMain(config, sys.argv)
+            break
+        
         print("\nNotpy options:")
         print("edit         - edit a Page")
         print("notebook     - add/delete Notebooks and pages")
@@ -24,8 +30,10 @@ def main():
         print("help         - Shows info for Notpy")
         print("configure    - configure Notpy")
         print("exit         - exit notpy")
+        
         work_dir = str(config["paths"]["homeDir"]) + str(config["paths"]["notebookDir"])
         user_input = str(input("What do you want to do? "))
+        
         match user_input:
             case "edit":
                 editFile(config,work_dir)
@@ -42,10 +50,4 @@ def main():
             case "exit":
                 exit()
             case _:
-                print("Nothing")
-    #print(renderMarkdown(str(getCurrentMarkdown(file_path))))
-    #return renderMarkdown(str(getCurrentMarkdown(file_path)))
-
-
-if __name__ == "__main__":
-    main()
+                print("Not a valid argument")

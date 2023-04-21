@@ -1,14 +1,22 @@
 import os
-from server.render_md import *
-from server.read_md import *
-from client.notebook import listNotebook, listPages, getNotebookPage, getUserInput
 import webbrowser
+from pathlib import Path
+from render_md import renderMarkdown
+from read_md import getCurrentMarkdown
+from notebook import listNotebook, listPages, getNotebookPage, getUserInput
+
 
 def createHTML(work_dir, md_file_path):
     if not os.path.exists(work_dir + "/tmp"):
         os.mkdir(work_dir + "/tmp")
     with open(work_dir + "/tmp/render.html", "w") as render_file:
-        render_file.write(renderMarkdown(getCurrentMarkdown(md_file_path)))
+        css_start   = '<!DOCTYPE html><html><head><link rel="stylesheet" type="text/css" href="' + str(Path.home()) + '/.config/notpy/styles.css"></head><body>\n'
+        css_end     = '</body></html>'
+        render_file.write(css_start + renderMarkdown(getCurrentMarkdown(md_file_path)) + css_end)
+
+def cliShowRenderMarkdown(work_dir):
+    webbrowser.open(work_dir + "/tmp/render.html")
+
 
 def showRenderedMarkdown(work_dir,config):
     listNotebook(config)
@@ -18,7 +26,6 @@ def showRenderedMarkdown(work_dir,config):
     path_relativ = getNotebookPage(config, notebook_id, page_id)
     path = work_dir + path_relativ
     
-    print(path)
     if os.path.exists(path):
         createHTML(work_dir, path)
         webbrowser.open_new_tab(work_dir + "/tmp/render.html")
