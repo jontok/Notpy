@@ -18,6 +18,12 @@ jobs:
   deploy:
 
     runs-on: ubuntu-latest
+    
+    uses: SebRollen/toml-action@v1.0.1
+      id: read_toml
+      with:
+        file: 'myfile.toml'
+        field: 'package.version'
 
     steps:
     - uses: actions/checkout@v3
@@ -32,7 +38,7 @@ jobs:
     - name: Build package
       run: poetry build
     - name: Test package
-      run:  pip install dist/notpy-${version}.tar.gz \
+      run:  pip install dist/notpy-${{ steps.read_toml.outputs.value }}.tar.gz \
             ls -lah /home/jt/.local/lib/python3.10/site-packages/notpy/ \
             notpy help
     - name: Publish package
