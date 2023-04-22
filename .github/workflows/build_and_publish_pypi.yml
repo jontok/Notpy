@@ -32,12 +32,8 @@ jobs:
         pip install poetry
     - name: Build package
       run: poetry build
-    - name: Get Pokemon name
-      uses: SebRollen/toml-action@v1.0.1
-        id: read_toml
-        with:
-          file: 'myfile.toml'
-          field: 'package.version'
+    - name: TOML Reader
+      uses: SebRollen/toml-action@v1.0.2
     - name: Test package
       run:  pip install dist/notpy-${{ steps.read_toml.outputs.value }}.tar.gz \
             ls -lah /home/jt/.local/lib/python3.10/site-packages/notpy/ \
