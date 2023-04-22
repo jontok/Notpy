@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "notpy"
-version = "0.0.1"
+version = "0.0.2"
 description = "Create/Delete files and edit them as markdown files in neovim"
 authors = ["jontok <jonas@tokmaji.de>"]
 license = "GPL-3.0-only"
