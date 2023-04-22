@@ -43,7 +43,7 @@ jobs:
         echo "Version: ${{ steps.read_toml.outputs.value }}"
         ls ./dist -lah
         pip install -r requirements.txt
-        pip install ./dist/notpy-${{ steps.read_toml.outputs.value }}.tar.gz \
+        pip install ./dist/notpy-${{ steps.read_toml.outputs.value }}-py3-none-any.whl \
         notpy help
     - name: Publish package
       uses: pypa/gh-action-pypi-publish@27b31702a0e7fc50959f5ad993c78deac1bdfc29
