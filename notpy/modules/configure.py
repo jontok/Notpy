@@ -103,7 +103,7 @@ def setupNotpy(config_file, config):
             print ("Not a valid value")
 
     config["setup"] = True
-    shutil.copyfile("./modules/style.css", str(Path.home()) + "/.config/notpy/style.css")
+    shutil.copyfile(str(Path.home()) + "/.local/lib/python3.10/site-packages/notpy/modules/style.css", str(Path.home()) + "/.config/notpy/style.css")
     setConfigFile(config_file, config)
     print("Setup finished")
 
