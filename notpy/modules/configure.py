@@ -54,7 +54,7 @@ def setConfigFile(config_file, config):
         f.close()
 
 def getDefaultPage():
-    with open("./README.md", "r") as readme:
+    with open(str(Path.home()) + "/.local/lib/python3.10/site-packages/notpy/modules/README.md", "r") as readme:
         default_md = readme.read()
         return default_md
 

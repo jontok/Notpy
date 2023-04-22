@@ -1,6 +1,6 @@
 #!/bin/bash
-
-version="0.0.1"
+echo $(./env/bin/stoml_linux_amd64 pyproject.toml tool.poetry.version)
+version=$(./env/bin/stoml_linux_amd64 pyproject.toml tool.poetry.version)
 
 pip uninstall notpy -y
 
