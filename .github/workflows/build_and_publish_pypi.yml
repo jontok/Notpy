@@ -39,9 +39,11 @@ jobs:
         file: "pyproject.toml"
         field: "tool.poetry.version"
     - name: Test package
-      run:  pip install dist/notpy-${{ steps.read_toml.outputs.value }}.tar.gz \
-            ls -lah /home/jt/.local/lib/python3.10/site-packages/notpy/ \
-            notpy help
+      run:  |
+        echo ${{ steps.read_toml.outputs.value }}
+        pip install dist/notpy-${{ steps.read_toml.outputs.value }}.tar.gz \
+        ls -lah /home/jt/.local/lib/python3.10/site-packages/notpy/ \
+        notpy help
     - name: Publish package
       uses: pypa/gh-action-pypi-publish@27b31702a0e7fc50959f5ad993c78deac1bdfc29
       with:
