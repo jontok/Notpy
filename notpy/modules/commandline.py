@@ -3,7 +3,7 @@ import shutil
 import pkg_resources
 from pathlib import Path
 from modules.edit_md import editNewFile
-from modules.configure import editConfig, setConfigFile, generatePageObject
+from modules.configure import editConfig, setConfigFile, generatePageObject, setDefaultEditor
 from modules.notebook import (
     getNotebookFromName,
     getPageFromName,

@@ -6,7 +6,7 @@ from pathlib import Path
 base_config = {
     "paths": {
         "homeDir": "",
-        "notebookDir": "/Notpy"
+        "defaultEditor": "nvim",
     },
     "notebooks": [
         {

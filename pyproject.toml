@@ -1,7 +1,7 @@
 [tool.poetry]
 name = "notpy"
-version = "0.0.4"
-description = "Create/Delete files and edit them as markdown files in neovim"
+version = "0.0.5"
+description = "Create/Delete files and edit them as markdown files in your text editor"
 authors = ["jontok <jonas@tokmaji.de>"]
 license = "GPL-3.0-only"
 readme = "README.md"
@@ -26,6 +26,7 @@ notpy = 'notpy:notpy.main'
 [tool.poetry.dependencies]
 python = "^3.10"
 markdown = "3.4.3"
+texteditor = "1.4.1"
 
 
 [build-system]
