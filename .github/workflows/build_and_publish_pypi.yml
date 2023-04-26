@@ -45,6 +45,6 @@ jobs:
         echo "Version: ${{ steps.read_toml.outputs.value }}"
         ls ./dist -lah
         pip install -r requirements.txt
-        pip install ./dist/notpy-${{ steps.read_toml.outputs.value }}-py3-none-any.whl \
+        pip install ./dist/notpy-${{ steps.read_toml.outputs.value }}.tar.gz \
         notpy help
     
