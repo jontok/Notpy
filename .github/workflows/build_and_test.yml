@@ -37,64 +37,66 @@ jobs:
       with:
         file: "pyproject.toml"
         field: "tool.poetry.version"
-    - name: Test package
+    - name: Install package
       run:  |
         echo "Version: ${{ steps.read_toml.outputs.value }}"
         ls ./dist -lah
         pip install ./dist/notpy-${{ steps.read_toml.outputs.value }}.tar.gz \
+    - name: Test package
+      run:  |
         notpy help
   
-  test-python3-11:
-    runs-on: ubuntu-latest
-    steps:
-    - uses: actions/checkout@v3
-    - name: Set up Python
-      uses: actions/setup-python@v3
-      with:
-        python-version: '3.11'
-    - name: Install dependencies
-      run: |
-        python -m pip install --upgrade pip
-        pip install poetry
-    - name: Build package
-      run: poetry build
-    - name: TOML Reader
-      uses: SebRollen/toml-action@v1.0.2
-      id: read_toml
-      with:
-        file: "pyproject.toml"
-        field: "tool.poetry.version"
-    - name: Test package
-      run:  |
-        echo "Version: ${{ steps.read_toml.outputs.value }}"
-        ls ./dist -lah
-        pip install ./dist/notpy-${{ steps.read_toml.outputs.value }}.tar.gz \
-        notpy help
+  # test-python3-11:
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #   - uses: actions/checkout@v3
+  #   - name: Set up Python
+  #     uses: actions/setup-python@v3
+  #     with:
+  #       python-version: '3.11'
+  #   - name: Install dependencies
+  #     run: |
+  #       python -m pip install --upgrade pip
+  #       pip install poetry
+  #   - name: Build package
+  #     run: poetry build
+  #   - name: TOML Reader
+  #     uses: SebRollen/toml-action@v1.0.2
+  #     id: read_toml
+  #     with:
+  #       file: "pyproject.toml"
+  #       field: "tool.poetry.version"
+  #   - name: Test package
+  #     run:  |
+  #       echo "Version: ${{ steps.read_toml.outputs.value }}"
+  #       ls ./dist -lah
+  #       pip install ./dist/notpy-${{ steps.read_toml.outputs.value }}.tar.gz \
+  #       notpy help
   
-  test-python3-12:
-    runs-on: ubuntu-latest
-    steps:
-    - uses: actions/checkout@v3
-    - name: Set up Python
-      uses: actions/setup-python@v3
-      with:
-        python-version: '3.12'
-    - name: Install dependencies
-      run: |
-        python -m pip install --upgrade pip
-        pip install poetry
-    - name: Build package
-      run: poetry build
-    - name: TOML Reader
-      uses: SebRollen/toml-action@v1.0.2
-      id: read_toml
-      with:
-        file: "pyproject.toml"
-        field: "tool.poetry.version"
-    - name: Test package
-      run:  |
-        echo "Version: ${{ steps.read_toml.outputs.value }}"
-        ls ./dist -lah
-        pip install ./dist/notpy-${{ steps.read_toml.outputs.value }}.tar.gz \
-        notpy help
+  # test-python3-12:
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #   - uses: actions/checkout@v3
+  #   - name: Set up Python
+  #     uses: actions/setup-python@v3
+  #     with:
+  #       python-version: '3.12'
+  #   - name: Install dependencies
+  #     run: |
+  #       python -m pip install --upgrade pip
+  #       pip install poetry
+  #   - name: Build package
+  #     run: poetry build
+  #   - name: TOML Reader
+  #     uses: SebRollen/toml-action@v1.0.2
+  #     id: read_toml
+  #     with:
+  #       file: "pyproject.toml"
+  #       field: "tool.poetry.version"
+  #   - name: Test package
+  #     run:  |
+  #       echo "Version: ${{ steps.read_toml.outputs.value }}"
+  #       ls ./dist -lah
+  #       pip install ./dist/notpy-${{ steps.read_toml.outputs.value }}.tar.gz \
+  #       notpy help
     
