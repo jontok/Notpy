@@ -3,6 +3,8 @@ import shutil
 import pkg_resources
 from pathlib import Path
 from modules.edit_md import editNewFile
+from modules.show_md import cliShowRenderMarkdown
+from modules.render_md import convertToPDF
 from modules.configure import editConfig, setConfigFile, generatePageObject, setDefaultEditor
 from modules.notebook import (
     getNotebookFromName,
@@ -32,8 +34,10 @@ def cliShowHelp():
     print()
     print("Commands:")
     print("  The following commands are available:")
+    print("  configure                      - configure Notpy")
     print("  ls nb                          - list all notebooks")
     print("  ls pg [notebook]               - list all pages in a notebook")
+    print("  show [notebook] [page]         - render page to pdf")
     print("  edit pg [notebook] [page]      - edit a page in a notebook")
     print("  create nb [notebook]           - create a new notebook")
     print("  create pg [notebook] [page]    - create a new page in a notebook")
@@ -104,7 +108,7 @@ def cliEditMethod(config, args):
             nb_dir = config["notebooks"][notebook_id]["name"]
             path = work_dir + "/" + nb_dir + "/" + pg_dir
             
-            editNewFile(path)
+            editNewFile(config, path)
         
         case _:
             print("Not avalid argument")
@@ -208,12 +212,40 @@ def cliDeleteMethod(config, args):
         case _:
             print("Not a valid argument")
 
+def cliEditConfig(config, args):
+    match len(args)-1:
+        case 3:
+            editor_str = str(args[3])
+            config["paths"]["defaultEditor"] = editor_str
+            setConfigFile(config_file, config)
+        case 2:
+            config = setDefaultEditor(config)
+            setConfigFile(config_file, config)
+        case 1:
+            editConfig()
+        case _:
+            print("Not a valid argument")
+
+def cliShowPage(config, args):
+    notebook_id = args[2]
+    try:
+        notebook_id = int(notebook_id)
+        
+    except ValueError:
+        if type(notebook_id) != int:
+            notebook_id = getNotebookFromName(config, notebook_id)
+    pg_dir = args[3]
+    work_dir    = config["paths"]["homeDir"] + config["paths"]["notebookDir"]
+    nb_dir      = work_dir + "/" + config["notebooks"][notebook_id]["name"]
+    path        = nb_dir + "/" + pg_dir
+    cliShowRenderMarkdown(nb_dir, path)
+
 def cliMain(config, args):
     match args[1]:
         case "console":
-            print("Console")
+            print("Console")          
         case "configure":
-            editConfig()
+            cliEditConfig(config, args)
         case "ls":
             cliListMethod(config, args)
         case "edit":
@@ -222,6 +254,8 @@ def cliMain(config, args):
             cliCreateMethod(config, args)
         case "delete":
             cliDeleteMethod(config, args)
+        case "show":
+            cliShowPage(config, args)
         case "help" | "-h" | "--help":
             cliShowHelp()
         case "version" | "-v" | "--version":

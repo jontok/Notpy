@@ -3,7 +3,7 @@ import texteditor
 from os import system
 from modules.configure import getDefaultEditor
 from modules.notebook import listNotebook, listPages, getNotebookPage, getUserInput, createNotebook, createPage
-from modules.show_md import createHTML
+from modules.show_md import convertToPDF
 
 def editNewFile(config, file_path):
     parts = file_path.rsplit("/", 2)  # split by "/" from right to left, up to 2 times
@@ -13,7 +13,7 @@ def editNewFile(config, file_path):
         editor = getDefaultEditor(config)
     system(editor + " " + file_path)
     if os.path.exists(file_path):
-        createHTML(work_dir, file_path)
+        convertToPDF(work_dir, file_path)
 
 
 
@@ -43,5 +43,5 @@ def editFile(config,work_dir):
     path_relativ = getNotebookPage(config, notebook_id, page_id)
     path = work_dir + path_relativ
     system("nvim " + path)
-    createHTML(work_dir, path)
+    convertToPDF(work_dir, path)
     
