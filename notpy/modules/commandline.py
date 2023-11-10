@@ -1,4 +1,5 @@
 import os
+from os.path import exists
 import shutil
 import pkg_resources
 from pathlib import Path
@@ -108,7 +109,16 @@ def cliEditMethod(config, args):
             nb_dir = config["notebooks"][notebook_id]["name"]
             path = work_dir + "/" + nb_dir + "/" + pg_dir
             
-            editNewFile(config, path)
+            if 5 < len(args):
+                if args[5] == "-y":
+                    os.mknod(path)
+                    config["notebooks"][notebook_id]["pages"].append(
+                        generatePageObject(config, notebook_id, pg_dir)
+                    )
+                    setConfigFile(config_file, config)
+                    exit()
+            else:
+                editNewFile(config, path)
         
         case _:
             print("Not avalid argument")
@@ -166,6 +176,15 @@ def cliDeleteMethod(config, args):
                 print("Page does not exist")
                 exit()
 
+            
+            if 5 < len(args):
+                if args[5] == "-y":
+                    deleteObjectFromConfig(config, config["notebooks"][notebook_id]["pages"], page_id)
+                    os.remove(path)
+                    print("Page deleted")
+                    exit()
+
+
             # Confirm and Delete page
             confirm_delete = getUserInput("Do you want to delete " + path + " (Y/n): ")
             match confirm_delete:
@@ -197,6 +216,13 @@ def cliDeleteMethod(config, args):
             if not os.path.exists(path):
                 print("Page does not exist")
                 exit()
+
+            if 4 < len(args):
+                if args[4] == "-y":
+                    deleteObjectFromConfig(config, config["notebooks"], notebook_id)
+                    shutil.rmtree(path)
+                    print("Notebook deleted")
+                    exit()
 
             # Confirm and Delete page
             confirm_delete = getUserInput("Do you want to delete " + path + " (Y/n): ")
