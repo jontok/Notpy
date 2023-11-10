@@ -45,7 +45,7 @@ jobs:
     - name: Test package
       run:  |
         ls -lah /opt/hostedtoolcache/Python/3.10.12/x64/lib/python3.10/site-packages/notpy/modules/
-        #./tests/test.sh
+        ./tests/test.sh
   
   # test-python3-11:
   #   runs-on: ubuntu-latest
