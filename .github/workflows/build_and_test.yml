@@ -33,7 +33,7 @@ jobs:
       id: build
       run: poetry build
     - name: TOML Reader
-      if: step.build.outcome == "success"
+      if: ${{ step.build.outcome }} == "success"
       uses: SebRollen/toml-action@v1.0.2
       id: read_toml
       with:
@@ -47,7 +47,7 @@ jobs:
         pip install ./dist/notpy-${{ steps.read_toml.outputs.value }}.tar.gz \
         ls -lah /opt/hostedtoolcache/Python/3.10.12/x64/lib/python3.10/site-packages/notpy/modules/
     - name: Test package
-      if: step.install.outcome == "success"
+      if: ${{ step.install.outcome }} == "success"
       run:  |
         ./tests/test.sh
   
