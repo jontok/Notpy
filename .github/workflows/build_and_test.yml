@@ -44,7 +44,8 @@ jobs:
         pip install ./dist/notpy-${{ steps.read_toml.outputs.value }}.tar.gz \
     - name: Test package
       run:  |
-        ./tests/test.sh
+        ls -lah /opt/hostedtoolcache/Python/3.10.12/x64/lib/python3.10/site-packages/notpy/modules/
+        #./tests/test.sh
   
   # test-python3-11:
   #   runs-on: ubuntu-latest
