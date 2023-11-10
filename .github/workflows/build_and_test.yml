@@ -44,7 +44,7 @@ jobs:
       run:  |
         echo "Version: ${{ steps.read_toml.outputs.value }}"
         ls ./dist -lah
-        pip install ./dist/notpy-${{ steps.read_toml.outputs.value }}.tar.gz \
+        pip install ./dist/notpy-${{ steps.read_toml.outputs.value }}.tar.gz
         ls -lah /opt/hostedtoolcache/Python/3.10.12/x64/lib/python3.10/site-packages/notpy/modules/
     - name: Test package
       if: ${{ steps.install.outcome }} == "success"
