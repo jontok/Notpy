@@ -7,7 +7,6 @@ license = "GPL-3.0-only"
 readme = "README.md"
 packages = [
     {include = "notpy"},
-    {include = "notpy/modules"}
 ]
 homepage = "https://github.com/jontok/Notpy"
 repository = "https://github.com/jontok/Notpy"
