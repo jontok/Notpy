@@ -49,6 +49,7 @@ jobs:
         retention-days: 1
   
   install-and-test:
+    needs: build-python3-10
     runs-on: ubuntu-latest
     steps: 
     - name: Install pip
