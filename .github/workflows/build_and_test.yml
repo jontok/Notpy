@@ -28,11 +28,16 @@ jobs:
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
-        pip install -r requirements.txt
+        #pip install -r requirements.txt
         pip install poetry
     - name: Build package
       id: build
       run: poetry build
+    - name: upload artifact
+      uses: actions/upload-artifact@v3
+      with:
+        name: notpy tar.gz
+        path: ./dist/notpy-${{ steps.read_toml.outputs.value }}.tar.gz
     - name: TOML Reader
       if: ${{ steps.build.outcome }} == "success"
       uses: SebRollen/toml-action@v1.0.2
