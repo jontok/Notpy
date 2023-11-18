@@ -61,8 +61,7 @@ jobs:
         name: notpy-artifact
     - name: Install package
       run:  |
-        ls ./dist -lah
-        ls -lah /opt/hostedtoolcache/Python/3.10.12/x64/lib/python3.10/site-packages/notpy/modules/
+        ls -lah
     - name: Test package
       run:  |
         ./tests/test.sh
