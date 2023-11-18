@@ -33,11 +33,6 @@ jobs:
     - name: Build package
       id: build
       run: poetry build
-    - name: upload artifact
-      uses: actions/upload-artifact@v3
-      with:
-        name: notpy tar.gz
-        path: ./dist/notpy-${{ steps.read_toml.outputs.value }}.tar.gz
     - name: TOML Reader
       if: ${{ steps.build.outcome }} == "success"
       uses: SebRollen/toml-action@v1.0.2
@@ -45,6 +40,12 @@ jobs:
       with:
         file: "pyproject.toml"
         field: "tool.poetry.version"
+    - name: upload artifact
+      uses: actions/upload-artifact@v3
+      with:
+        name: notpy tar.gz
+        path: ./dist/notpy-${{ steps.read_toml.outputs.value }}.tar.gz
+
     - name: Install package
       id: install
       run:  |
