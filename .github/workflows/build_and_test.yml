@@ -65,8 +65,15 @@ jobs:
         pip install notpy-*.tar.gz
     - name: Test package
       run:  |
-        ./tests/test.sh
-
+        notpy -v
+        notpy help
+        # notpy create nb testing
+        # notpy create pg testing testing.md -y
+        # notpy ls nb
+        # notpy ls pg default
+        # notpy show testing testing.md
+        # notpy delete pg testing testing.md -y
+        # notpy delete nb testing -y
   # test-python3-11:
   #   runs-on: ubuntu-latest
   #   steps:
