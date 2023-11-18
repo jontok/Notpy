@@ -62,6 +62,7 @@ jobs:
     - name: Install package
       run:  |
         ls -lah
+        pip install notpy-*.tar.gz
     - name: Test package
       run:  |
         ./tests/test.sh
