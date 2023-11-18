@@ -6,7 +6,7 @@ from pathlib import Path
 from modules.edit_md import editNewFile
 from modules.show_md import cliShowRenderMarkdown
 from modules.render_md import convertToPDF
-from modules.configure import editConfig, setConfigFile, generatePageObject, setDefaultEditor
+from modules.configure import editConfig, setConfigFile, initConfigFile, generatePageObject, setDefaultEditor
 from modules.notebook import (
     getNotebookFromName,
     getPageFromName,
@@ -245,6 +245,12 @@ def cliEditConfig(config, args):
             config["paths"]["defaultEditor"] = editor_str
             setConfigFile(config_file, config)
         case 2:
+            if args[2] == "default":
+                home = str(Path.home())
+                path = home + "/.config/notpy"
+                config_file = path + "/config.json"
+                config = initConfigFile(path,config_file)
+                exit()
             config = setDefaultEditor(config)
             setConfigFile(config_file, config)
         case 1:
