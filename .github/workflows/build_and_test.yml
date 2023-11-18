@@ -68,7 +68,9 @@ jobs:
         notpy -v
         notpy help
         notpy configure default
+        sleep 2
         cat $HOME/.config/notpy/config.json 
+        sleep 2
         notpy create nb testing
         notpy create pg testing testing.md -y
         notpy ls nb
