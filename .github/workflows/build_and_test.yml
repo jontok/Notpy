@@ -67,7 +67,7 @@ jobs:
       run:  |
         notpy -v
         notpy help
-        notpy configure default
+        notpy configure default -y
         sleep 2
         cat $HOME/.config/notpy/config.json 
         sleep 2
