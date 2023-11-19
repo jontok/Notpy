@@ -36,6 +36,8 @@ def getConfigFile(config_file=default_config_file):
             json_data = json.load(f)
             f.close()
             return json_data
+def getBaseConfig():
+    return base_config
 
 def initConfigFile(path, config_file):
     if not os.path.exists(path):

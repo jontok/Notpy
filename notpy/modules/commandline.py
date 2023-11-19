@@ -6,7 +6,7 @@ from pathlib import Path
 from modules.edit_md import editNewFile
 from modules.show_md import cliShowRenderMarkdown
 from modules.render_md import convertToPDF
-from modules.configure import editConfig, setConfigFile, initConfigFile, generatePageObject, setDefaultEditor
+from modules.configure import editConfig, setConfigFile, getBaseConfig, generatePageObject, setDefaultEditor
 from modules.notebook import (
     getNotebookFromName,
     getPageFromName,
@@ -238,26 +238,47 @@ def cliDeleteMethod(config, args):
         case _:
             print("Not a valid argument")
 
+def setDefaultConfig():
+    home = str(Path.home())
+    path = home + "/.config/notpy"
+    config_file = path + "/config.json"
+    config = getBaseConfig()
+    setConfigFile(config_file, config)
+    exit()
+
 def cliEditConfig(config, args):
-    match len(args)-1:
-        case 3:
+    if args[1] == "configure" and len(args)-1 == 1:
+        editConfig()
+        exit()
+
+    match args[2]:
+        case "editor":
+            print(args[2])
             editor_str = str(args[3])
             config["paths"]["defaultEditor"] = editor_str
             setConfigFile(config_file, config)
-        case 2:
-            if args[2] == "default":
-                home = str(Path.home())
-                path = home + "/.config/notpy"
-                config_file = path + "/config.json"
-                config = initConfigFile(path,config_file)
-                exit()
-            config = setDefaultEditor(config)
-            setConfigFile(config_file, config)
-        case 1:
-            editConfig()
+        case "default":
+            try:
+                if args[3] == "-y":
+                    setDefaultConfig()
+            except IndexError:
+                confirm = str(input("This will overwrite your current config and could break Notpy, continue anyway (Y/n): "))
+                match confirm:
+                    case "Y" | "y" | "yes":
+                        setDefaultConfig()
+                    case "N" | "n" | "no":
+                        exit()
+                    case _:
+                        print("Not a valid argument")
+        case "help":
+            print("  notpy configure [command] [options]")
+            print("  The following commands are available:")
+            print("  editor                      - set default editor")
+            print("  default                     - set default configuration (made for CI/CD) -y flag for non-interactiv")
+            
         case _:
             print("Not a valid argument")
-
+ 
 def cliShowPage(config, args):
     notebook_id = args[2]
     try:
