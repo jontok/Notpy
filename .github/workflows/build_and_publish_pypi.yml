@@ -18,6 +18,7 @@ on:
       - ".github/workflows/**"
 
 permissions:
+  id-token: write
   contents: read
 
 jobs:
