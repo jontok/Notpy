@@ -12,7 +12,6 @@ on:
   push:
     branches:
       - master
-      - develop
 
 permissions:
   contents: read
@@ -58,8 +57,8 @@ jobs:
       uses: actions/download-artifact@v3
       with:
         name: notpy-artifact
-    # - name: Publish package
-    #   uses: pypa/gh-action-pypi-publish@release/v1
-    #     with:
-    #       user: __token__
-    #       password: ${{ secrets.PYPI_API_TOKEN }}    
+    - name: Publish package
+      uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          user: __token__
+          password: ${{ secrets.PYPI_API_TOKEN }}    
