@@ -1,9 +1,12 @@
 import os
+from os.path import exists
 import shutil
 import pkg_resources
 from pathlib import Path
 from modules.edit_md import editNewFile
-from modules.configure import editConfig, setConfigFile, generatePageObject
+from modules.show_md import cliShowRenderMarkdown
+from modules.render_md import convertToPDF
+from modules.configure import editConfig, setConfigFile, getBaseConfig, generatePageObject, setDefaultEditor
 from modules.notebook import (
     getNotebookFromName,
     getPageFromName,
@@ -32,8 +35,10 @@ def cliShowHelp():
     print()
     print("Commands:")
     print("  The following commands are available:")
+    print("  configure                      - configure Notpy")
     print("  ls nb                          - list all notebooks")
     print("  ls pg [notebook]               - list all pages in a notebook")
+    print("  show [notebook] [page]         - render page to pdf")
     print("  edit pg [notebook] [page]      - edit a page in a notebook")
     print("  create nb [notebook]           - create a new notebook")
     print("  create pg [notebook] [page]    - create a new page in a notebook")
@@ -104,7 +109,16 @@ def cliEditMethod(config, args):
             nb_dir = config["notebooks"][notebook_id]["name"]
             path = work_dir + "/" + nb_dir + "/" + pg_dir
             
-            editNewFile(path)
+            if 5 < len(args):
+                if args[5] == "-y":
+                    os.mknod(path)
+                    config["notebooks"][notebook_id]["pages"].append(
+                        generatePageObject(config, notebook_id, pg_dir)
+                    )
+                    setConfigFile(config_file, config)
+                    exit()
+            else:
+                editNewFile(config, path)
         
         case _:
             print("Not avalid argument")
@@ -162,6 +176,15 @@ def cliDeleteMethod(config, args):
                 print("Page does not exist")
                 exit()
 
+            
+            if 5 < len(args):
+                if args[5] == "-y":
+                    deleteObjectFromConfig(config, config["notebooks"][notebook_id]["pages"], page_id)
+                    os.remove(path)
+                    print("Page deleted")
+                    exit()
+
+
             # Confirm and Delete page
             confirm_delete = getUserInput("Do you want to delete " + path + " (Y/n): ")
             match confirm_delete:
@@ -194,6 +217,13 @@ def cliDeleteMethod(config, args):
                 print("Page does not exist")
                 exit()
 
+            if 4 < len(args):
+                if args[4] == "-y":
+                    deleteObjectFromConfig(config, config["notebooks"], notebook_id)
+                    shutil.rmtree(path)
+                    print("Notebook deleted")
+                    exit()
+
             # Confirm and Delete page
             confirm_delete = getUserInput("Do you want to delete " + path + " (Y/n): ")
             match confirm_delete:
@@ -208,12 +238,77 @@ def cliDeleteMethod(config, args):
         case _:
             print("Not a valid argument")
 
+def setDefaultConfig():
+    home = str(Path.home())
+    path = home + "/.config/notpy"
+    config_file = path + "/config.json"
+    config = getBaseConfig()
+    if not os.path.exists(path):
+        os.mkdir(path)
+    if not os.path.exists(config_file):
+        with open(config_file, 'w'): pass
+    homeDir = config["paths"]["homeDir"]
+    if homeDir == "":
+        config["paths"]["homeDir"] = str(Path.home())
+    notebookPath = str(config["paths"]["homeDir"]) + str(config["paths"]["notebookDir"])
+    if not os.path.exists(notebookPath):
+        os.mkdir(notebookPath)
+    setConfigFile(config_file, config)
+    exit()
+
+def cliEditConfig(config, args):
+    if args[1] == "configure" and len(args)-1 == 1:
+        editConfig()
+        exit()
+
+    match args[2]:
+        case "editor":
+            print(args[2])
+            editor_str = str(args[3])
+            config["paths"]["defaultEditor"] = editor_str
+            setConfigFile(config_file, config)
+        case "default":
+            try:
+                if args[3] == "-y":
+                    setDefaultConfig()
+            except IndexError:
+                confirm = str(input("This will overwrite your current config and could break Notpy, continue anyway (Y/n): "))
+                match confirm:
+                    case "Y" | "y" | "yes":
+                        setDefaultConfig()
+                    case "N" | "n" | "no":
+                        exit()
+                    case _:
+                        print("Not a valid argument")
+        case "help":
+            print("  notpy configure [command] [options]")
+            print("  The following commands are available:")
+            print("  editor                      - set default editor")
+            print("  default                     - set default configuration (made for CI/CD) -y flag for non-interactiv")
+            
+        case _:
+            print("Not a valid argument")
+ 
+def cliShowPage(config, args):
+    notebook_id = args[2]
+    try:
+        notebook_id = int(notebook_id)
+        
+    except ValueError:
+        if type(notebook_id) != int:
+            notebook_id = getNotebookFromName(config, notebook_id)
+    pg_dir = args[3]
+    work_dir    = config["paths"]["homeDir"] + config["paths"]["notebookDir"]
+    nb_dir      = work_dir + "/" + config["notebooks"][notebook_id]["name"]
+    path        = nb_dir + "/" + pg_dir
+    cliShowRenderMarkdown(nb_dir, path)
+
 def cliMain(config, args):
     match args[1]:
         case "console":
-            print("Console")
+            print("Console")          
         case "configure":
-            editConfig()
+            cliEditConfig(config, args)
         case "ls":
             cliListMethod(config, args)
         case "edit":
@@ -222,6 +317,8 @@ def cliMain(config, args):
             cliCreateMethod(config, args)
         case "delete":
             cliDeleteMethod(config, args)
+        case "show":
+            cliShowPage(config, args)
         case "help" | "-h" | "--help":
             cliShowHelp()
         case "version" | "-v" | "--version":

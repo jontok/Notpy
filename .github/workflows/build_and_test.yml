@@ -1,0 +1,134 @@
+# This workflow will upload a Python Package using Twine when a release is created
+# For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-python#publishing-to-package-registries
+
+# This workflow uses actions that are not certified by GitHub.
+# They are provided by a third-party and are governed by
+# separate terms of service, privacy policy, and support
+# documentation.
+
+name: Test Python Package
+
+on:
+  push:
+    paths-ignore:
+      - "**/README.md"
+
+permissions:
+  contents: read
+
+jobs:
+  build-python3-10:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+    - name: Set up Python
+      uses: actions/setup-python@v3
+      with:
+        python-version: '3.10'
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        #pip install -r requirements.txt
+        pip install poetry
+        echo $HOME
+    - name: Build package
+      id: build
+      run: poetry build
+    - name: TOML Reader
+      if: ${{ steps.build.outcome }} == "success"
+      uses: SebRollen/toml-action@v1.0.2
+      id: read_toml
+      with:
+        file: "pyproject.toml"
+        field: "tool.poetry.version"
+    - name: upload artifact
+      uses: actions/upload-artifact@v3
+      with:
+        name: notpy-artifact
+        path: ./dist/notpy-${{ steps.read_toml.outputs.value }}.tar.gz
+        retention-days: 1
+  
+  install-and-test:
+    needs: build-python3-10
+    runs-on: ubuntu-latest
+    steps: 
+    - name: Install pip
+      run: |
+        python -m pip install --upgrade pip
+    - name: Download artifact
+      uses: actions/download-artifact@v3
+      with:
+        name: notpy-artifact
+    - name: Install package
+      run:  |
+        ls -lah
+        pip install notpy-*.tar.gz
+    - name: Test package
+      run:  |
+        notpy -v
+        notpy help
+        notpy configure default -y
+        sleep 2
+        cat $HOME/.config/notpy/config.json 
+        sleep 2
+        notpy create nb testing
+        notpy create pg testing testing.md -y
+        notpy ls nb
+        notpy ls pg default
+        notpy show testing testing.md
+        notpy delete pg testing testing.md -y
+        notpy delete nb testing -y
+  # test-python3-11:
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #   - uses: actions/checkout@v3
+  #   - name: Set up Python
+  #     uses: actions/setup-python@v3
+  #     with:
+  #       python-version: '3.11'
+  #   - name: Install dependencies
+  #     run: |
+  #       python -m pip install --upgrade pip
+  #       pip install poetry
+  #   - name: Build package
+  #     run: poetry build
+  #   - name: TOML Reader
+  #     uses: SebRollen/toml-action@v1.0.2
+  #     id: read_toml
+  #     with:
+  #       file: "pyproject.toml"
+  #       field: "tool.poetry.version"
+  #   - name: Test package
+  #     run:  |
+  #       echo "Version: ${{ steps.read_toml.outputs.value }}"
+  #       ls ./dist -lah
+  #       pip install ./dist/notpy-${{ steps.read_toml.outputs.value }}.tar.gz \
+  #       notpy help
+  
+  # test-python3-12:
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #   - uses: actions/checkout@v3
+  #   - name: Set up Python
+  #     uses: actions/setup-python@v3
+  #     with:
+  #       python-version: '3.12'
+  #   - name: Install dependencies
+  #     run: |
+  #       python -m pip install --upgrade pip
+  #       pip install poetry
+  #   - name: Build package
+  #     run: poetry build
+  #   - name: TOML Reader
+  #     uses: SebRollen/toml-action@v1.0.2
+  #     id: read_toml
+  #     with:
+  #       file: "pyproject.toml"
+  #       field: "tool.poetry.version"
+  #   - name: Test package
+  #     run:  |
+  #       echo "Version: ${{ steps.read_toml.outputs.value }}"
+  #       ls ./dist -lah
+  #       pip install ./dist/notpy-${{ steps.read_toml.outputs.value }}.tar.gz \
+  #       notpy help
+    

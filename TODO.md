@@ -1,7 +1,12 @@
 # To-Do's
 - [x] CLI Commandline Tooling
-- [ ] Release pipeline
+  - [ ] show rendered file via comandline
+- [x] Release pipeline
 - [ ] Scan on App Startup
 - [ ] Borwser Select (Firefox, Chrome, chromium)
+- [x] Select Texteditor
+  - [x] select texteditor from confiile
+  - [x] configure texteditor to config file
+- [ ] Windows Compadibility
 - [ ] Render from kiosk window
 - [ ] html/markdown to pdf

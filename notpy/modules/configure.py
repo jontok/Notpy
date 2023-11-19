@@ -6,7 +6,9 @@ from pathlib import Path
 base_config = {
     "paths": {
         "homeDir": "",
-        "notebookDir": "/Notpy"
+        "notebookDir": "/Notpy",
+        "defaultEditor": "nvim",
+        "defaultBorwser": "firefox"
     },
     "notebooks": [
         {
@@ -34,6 +36,8 @@ def getConfigFile(config_file=default_config_file):
             json_data = json.load(f)
             f.close()
             return json_data
+def getBaseConfig():
+    return base_config
 
 def initConfigFile(path, config_file):
     if not os.path.exists(path):
@@ -50,6 +54,7 @@ def initConfigFile(path, config_file):
 def setConfigFile(config_file, config):
     with open(config_file, "r+") as f:
         f.seek(0)
+        f.truncate(0)
         json.dump(config, f)
         f.close()
 
@@ -66,6 +71,17 @@ def generatePageObject(config, notebook_id, pg_dir):
 
     return page_obj
 
+def setDefaultEditor(config):
+    editor_str = str(input("Type your default editor (String): ")).lower()
+    config["paths"]["defaultEditor"] = ""
+    if shutil.which(editor_str):
+        config["paths"]["defaultEditor"] = editor_str
+    return config
+    
+
+def getDefaultEditor(config):
+    editor = config["paths"]["defaultEditor"]
+    return editor
 
 def setupNotpy(config_file, config):
     
@@ -101,6 +117,9 @@ def setupNotpy(config_file, config):
             return "done"
         case _:
             print ("Not a valid value")
+
+    # Set default Editor
+    config = setDefaultEditor(config)
 
     config["setup"] = True
     shutil.copyfile(str(Path.home()) + "/.local/lib/python3.10/site-packages/notpy/modules/style.css", str(Path.home()) + "/.config/notpy/style.css")

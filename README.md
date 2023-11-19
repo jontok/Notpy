@@ -1,6 +1,8 @@
 # NotPy
 A command line tool to manage markdown files for taking notes.
 
+[![Test Python Package](https://github.com/jontok/Notpy/actions/workflows/build_and_test.yml/badge.svg)](https://github.com/jontok/Notpy/actions/workflows/build_and_test.yml)
+
 ## Introduction
 NotPy is a tool to help you manage markdown files for taking notes. You can create, edit, and delete notebooks and pages with simple CLI commands. NotPy is built using Python, and it uses some third-party libraries such as `click`, `pathlib`, and `toml`.
 
