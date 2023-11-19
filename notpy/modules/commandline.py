@@ -243,6 +243,10 @@ def setDefaultConfig():
     path = home + "/.config/notpy"
     config_file = path + "/config.json"
     config = getBaseConfig()
+    if not os.path.exists(path):
+        os.mkdir(path)
+    if not os.path.exists(config_file):
+        with open(config_file, 'w'): pass
     setConfigFile(config_file, config)
     exit()
 
