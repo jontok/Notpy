@@ -247,6 +247,12 @@ def setDefaultConfig():
         os.mkdir(path)
     if not os.path.exists(config_file):
         with open(config_file, 'w'): pass
+    config["paths"]["homeDir"] = homeDir
+    if homeDir == "":
+        config["paths"]["homeDir"] = str(Path.home())
+    notebookPath = str(config["paths"]["homeDir"]) + str(config["paths"]["notebookDir"])
+    if not os.path.exists(notebookPath):
+        os.mkdir(notebookPath)
     setConfigFile(config_file, config)
     exit()
 
