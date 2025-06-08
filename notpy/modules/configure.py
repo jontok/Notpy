@@ -63,13 +63,6 @@ def getDefaultPage():
         default_md = readme.read()
         return default_md
 
-def generatePageObject(config, notebook_id, pg_dir):
-    page_obj = {
-        "id": len(config["notebooks"][notebook_id]["pages"]),
-        "name": pg_dir
-    }
-
-    return page_obj
 
 def setDefaultEditor(config):
     editor_str = str(input("Type your default editor (String): ")).lower()
@@ -99,7 +92,8 @@ def setupNotpy(config_file, config):
 
     notebookPath = str(config["paths"]["homeDir"]) + str(config["paths"]["notebookDir"])
     if not os.path.exists(notebookPath):
-        os.mkdir(notebookPath)
+        # Security fix: Set secure directory permissions (ENISA least privilege)
+        os.mkdir(notebookPath, mode=0o700)
     
 
     defaultBook = str(input("Do you want to create the default notebook (default: yes) y/n: "))
@@ -107,12 +101,16 @@ def setupNotpy(config_file, config):
         case "y" | "yes" | "":
             defaultNotebookDir = str(notebookPath) + "/" + str(config["notebooks"][0]["name"])
             if not os.path.exists(defaultNotebookDir):
-                os.mkdir(defaultNotebookDir)
+                # Security fix: Set secure directory permissions (ENISA least privilege)
+                os.mkdir(defaultNotebookDir, mode=0o700)
             defaultPagePath = defaultNotebookDir + "/" + config["notebooks"][0]["pages"][0]["name"]
             if not os.path.exists(defaultPagePath):
+                # Security fix: Create file with secure permissions
                 with open(defaultPagePath, "x") as defaultPage:
                     defaultPage.write(getDefaultPage())
-                    return "done"
+                # Set secure file permissions after creation
+                os.chmod(defaultPagePath, 0o600)
+                return "done"
         case "n" | "no":
             return "done"
         case _:

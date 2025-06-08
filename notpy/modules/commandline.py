@@ -6,7 +6,7 @@ from pathlib import Path
 from modules.edit_md import editNewFile
 from modules.show_md import cliShowRenderMarkdown
 from modules.render_md import convertToPDF
-from modules.configure import editConfig, setConfigFile, getBaseConfig, generatePageObject, setDefaultEditor
+from modules.configure import editConfig, setConfigFile, getBaseConfig, setDefaultEditor
 from modules.notebook import (
     getNotebookFromName,
     getPageFromName,
@@ -14,8 +14,36 @@ from modules.notebook import (
     listNotebook,
     listPages,
     createNotebook,
-    getUserInput
+    getUserInput,
+    generatePageObject
 )
+###################################################################
+# Security utilities (ENISA Secure Coding Guidelines)
+###################################################################
+
+def secure_path_join(base_path, *components):
+    """
+    Securely join path components preventing path traversal attacks.
+    Based on ENISA secure coding guidelines and CERT-EU recommendations.
+    
+    Args:
+        base_path: The base directory that result must be within
+        *components: Path components to join
+        
+    Returns:
+        str: Secure absolute path
+        
+    Raises:
+        ValueError: If path traversal is detected
+    """
+    base_path = os.path.abspath(base_path)
+    full_path = os.path.abspath(os.path.join(base_path, *components))
+    
+    if not full_path.startswith(base_path + os.sep) and full_path != base_path:
+        raise ValueError(f"Path traversal detected: {full_path} outside {base_path}")
+    
+    return full_path
+
 ###################################################################
 # CLI
 ###################################################################
@@ -96,10 +124,17 @@ def cliEditMethod(config, args):
 
             try:
                 pg_dir = config["notebooks"][notebook_id]["pages"][page_id]["name"]
-            except:
-                pg_dir      = args[4]
-                if pg_dir[:3] == ".md":
+            except (KeyError, IndexError, TypeError) as e:
+                # Security fix: Specific exception handling (ENISA guidelines)
+                pg_dir = args[4]
+                if not pg_dir.endswith(".md"):
                     pg_dir = pg_dir + ".md"
+                
+                # Validate page name
+                if not pg_dir or len(pg_dir) > 255:
+                    print("Invalid page name")
+                    return
+                
                 config["notebooks"][notebook_id]["pages"].append(
                     generatePageObject(config, notebook_id, pg_dir)
                 )
@@ -107,11 +142,23 @@ def cliEditMethod(config, args):
 
             work_dir = config["paths"]["homeDir"] + config["paths"]["notebookDir"]
             nb_dir = config["notebooks"][notebook_id]["name"]
-            path = work_dir + "/" + nb_dir + "/" + pg_dir
+            
+            # Security fix: Use secure path joining to prevent path traversal
+            try:
+                path = secure_path_join(work_dir, nb_dir, pg_dir)
+            except ValueError as e:
+                print(f"Security error: {e}")
+                return
             
             if 5 < len(args):
                 if args[5] == "-y":
-                    os.mknod(path)
+                    # Security fix: Set secure file permissions (ENISA guidelines)
+                    # 0o644 = owner read/write, group/others read only
+                    try:
+                        os.mknod(path, mode=0o644)
+                    except OSError as e:
+                        print(f"Error creating file: {e}")
+                        return
                     config["notebooks"][notebook_id]["pages"].append(
                         generatePageObject(config, notebook_id, pg_dir)
                     )
@@ -162,14 +209,26 @@ def cliDeleteMethod(config, args):
 
             # generate path
             try:
-                pg_dir      = config["notebooks"][notebook_id]["pages"][page_id]["name"]
-            except:
-                pg_dir      = args[4]
-                if pg_dir[:3] == ".md":
+                pg_dir = config["notebooks"][notebook_id]["pages"][page_id]["name"]
+            except (KeyError, IndexError, TypeError):
+                # Security fix: Specific exception handling and validation
+                pg_dir = args[4]
+                if not pg_dir.endswith(".md"):
                     pg_dir = pg_dir + ".md"
+                
+                # Validate page name
+                if not pg_dir or len(pg_dir) > 255:
+                    print("Invalid page name")
+                    return
             work_dir    = config["paths"]["homeDir"] + config["paths"]["notebookDir"]
             nb_dir      = config["notebooks"][notebook_id]["name"]
-            path        = work_dir + "/" + nb_dir + "/" + pg_dir
+            
+            # Security fix: Use secure path joining to prevent path traversal
+            try:
+                path = secure_path_join(work_dir, nb_dir, pg_dir)
+            except ValueError as e:
+                print(f"Security error: {e}")
+                return
             
             # check if path exists
             if not os.path.exists(path):
@@ -187,11 +246,25 @@ def cliDeleteMethod(config, args):
 
             # Confirm and Delete page
             confirm_delete = getUserInput("Do you want to delete " + path + " (Y/n): ")
+            if confirm_delete is None:
+                return
+                
             match confirm_delete:
                 case "y" | "Y":
-                    deleteObjectFromConfig(config, config["notebooks"][notebook_id]["pages"], page_id)
-                    os.remove(path)
-                    print("Page deleted")
+                    # Security fix: Safe file deletion with validation (BSI guidelines)
+                    try:
+                        # Validate file exists and is a regular file
+                        if not os.path.isfile(path):
+                            print("Error: Not a valid file")
+                            return
+                        
+                        deleteObjectFromConfig(config, config["notebooks"][notebook_id]["pages"], page_id)
+                        os.remove(path)
+                        print("Page deleted")
+                    except OSError as e:
+                        print(f"Error deleting file: {e}")
+                    except Exception as e:
+                        print(f"Unexpected error: {e}")
                 case _:
                     print("Page not deleted")
                 
@@ -210,7 +283,13 @@ def cliDeleteMethod(config, args):
             # set Notebook path
             work_dir    = config["paths"]["homeDir"] + config["paths"]["notebookDir"]
             nb_dir      = config["notebooks"][notebook_id]["name"]
-            path        = work_dir + "/" + nb_dir
+            
+            # Security fix: Use secure path joining to prevent path traversal
+            try:
+                path = secure_path_join(work_dir, nb_dir)
+            except ValueError as e:
+                print(f"Security error: {e}")
+                return
 
             # check if path exists
             if not os.path.exists(path):
@@ -226,11 +305,31 @@ def cliDeleteMethod(config, args):
 
             # Confirm and Delete page
             confirm_delete = getUserInput("Do you want to delete " + path + " (Y/n): ")
+            if confirm_delete is None:
+                return
+                
             match confirm_delete:
                 case "y" | "Y":
-                    deleteObjectFromConfig(config, config["notebooks"], notebook_id)
-                    shutil.rmtree(path)
-                    print("Notebook deleted")
+                    # Security fix: Safe directory deletion with validation (ENISA guidelines)
+                    try:
+                        # Validate directory exists and is actually a directory
+                        if not os.path.isdir(path):
+                            print("Error: Not a valid directory")
+                            return
+                        
+                        # Additional safety: check if directory is within expected notebook area
+                        notebook_base = config["paths"]["homeDir"] + config["paths"]["notebookDir"]
+                        if not path.startswith(os.path.abspath(notebook_base)):
+                            print("Error: Directory outside notebook area")
+                            return
+                        
+                        deleteObjectFromConfig(config, config["notebooks"], notebook_id)
+                        shutil.rmtree(path)
+                        print("Notebook deleted")
+                    except OSError as e:
+                        print(f"Error deleting directory: {e}")
+                    except Exception as e:
+                        print(f"Unexpected error: {e}")
                 case _:
                     print("Notebook not deleted")
 
@@ -244,15 +343,23 @@ def setDefaultConfig():
     config_file = path + "/config.json"
     config = getBaseConfig()
     if not os.path.exists(path):
-        os.mkdir(path)
+        # Security fix: Set secure directory permissions (BSI/ENISA least privilege)
+        # 0o700 = owner full access only, no group/others access
+        os.mkdir(path, mode=0o700)
     if not os.path.exists(config_file):
-        with open(config_file, 'w'): pass
+        # Security fix: Create config file with secure permissions (ENISA least privilege)
+        # 0o600 = owner read/write only, no group/others access to config data
+        with open(config_file, 'w') as f:
+            pass
+        os.chmod(config_file, 0o600)
     homeDir = config["paths"]["homeDir"]
     if homeDir == "":
         config["paths"]["homeDir"] = str(Path.home())
     notebookPath = str(config["paths"]["homeDir"]) + str(config["paths"]["notebookDir"])
     if not os.path.exists(notebookPath):
-        os.mkdir(notebookPath)
+        # Security fix: Set secure directory permissions (ENISA least privilege)
+        # 0o700 = owner full access only, protecting user notes from other users
+        os.mkdir(notebookPath, mode=0o700)
     setConfigFile(config_file, config)
     exit()
 
@@ -299,8 +406,15 @@ def cliShowPage(config, args):
             notebook_id = getNotebookFromName(config, notebook_id)
     pg_dir = args[3]
     work_dir    = config["paths"]["homeDir"] + config["paths"]["notebookDir"]
-    nb_dir      = work_dir + "/" + config["notebooks"][notebook_id]["name"]
-    path        = nb_dir + "/" + pg_dir
+    nb_name     = config["notebooks"][notebook_id]["name"]
+    
+    # Security fix: Use secure path joining to prevent path traversal
+    try:
+        nb_dir = secure_path_join(work_dir, nb_name)
+        path = secure_path_join(nb_dir, pg_dir)
+    except ValueError as e:
+        print(f"Security error: {e}")
+        return
     cliShowRenderMarkdown(nb_dir, path)
 
 def cliMain(config, args):
