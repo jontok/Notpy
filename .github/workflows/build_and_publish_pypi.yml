@@ -9,6 +9,7 @@
 name: Upload Python Package
 
 on:
+  workflow_dispatch:
   push:
     branches:
       - master
@@ -55,13 +56,14 @@ jobs:
   publish-artifact:
     needs: build-python3-10
     runs-on: ubuntu-latest
+    environment: pypi_publish
+    permissions:
+      id-token: write
     steps: 
     - name: Download artifact
       uses: actions/download-artifact@v3
       with:
         name: notpy-artifact
+        path: dist/
     - name: Publish package
       uses: pypa/gh-action-pypi-publish@release/v1
-      with:
-        user: __token__
-        password: ${{ secrets.PYPI_API_TOKEN }}    

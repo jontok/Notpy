@@ -21,7 +21,9 @@ def createNotebook(config,name):
         }
         config["notebooks"].append(new_notebook)
         setConfigFile(config_file, config)
-        os.mkdir(new_notebook_path)
+        # Security fix: Set secure directory permissions (ENISA least privilege)
+        # 0o700 = owner full access only, protecting notebook contents
+        os.mkdir(new_notebook_path, mode=0o700)
     else:
         print("Notebook " + name + " already exists")
 
@@ -102,15 +104,64 @@ def deleteNotebook(config):
 
 
 def getUserInput(prompt, return_type="str"):
-    user_input = input(prompt)
-    if user_input != "":
-        match return_type:
-            case "str":
-                return str(user_input)
-            case "int":
-                return int(user_input)
-    else:
+    """
+    Get validated user input with security controls (ENISA guidelines).
+    
+    Args:
+        prompt: The input prompt to display
+        return_type: "str" or "int" for return type validation
+        
+    Returns:
+        Validated user input or None if invalid
+        
+    Security features:
+        - Input length limits
+        - Character validation 
+        - Integer range validation
+        - Path traversal prevention
+    """
+    import re
+    
+    user_input = input(prompt).strip()
+    
+    if user_input == "":
         print("Not a valid input")
+        return None
+        
+    # Security: Input length validation (ENISA recommendation)
+    if len(user_input) > 255:
+        print("Input too long (max 255 characters)")
+        return None
+    
+    match return_type:
+        case "str":
+            # Security: Validate string input (prevent path traversal)
+            if ".." in user_input or user_input.startswith("/"):
+                print("Invalid characters in input")
+                return None
+            
+            # Allow alphanumeric, spaces, hyphens, underscores, dots
+            if not re.match(r'^[a-zA-Z0-9\s\-_.]+$', user_input):
+                print("Invalid characters in input")
+                return None
+                
+            return str(user_input)
+            
+        case "int":
+            try:
+                value = int(user_input)
+                # Security: Range validation for integer inputs
+                if value < 0 or value > 999999:
+                    print("Number out of valid range (0-999999)")
+                    return None
+                return value
+            except ValueError:
+                print("Not a valid number")
+                return None
+                
+        case _:
+            print("Invalid return type specified")
+            return None
 
 
 def listNotebook(config):
@@ -167,6 +218,13 @@ def getPageFromName(config, notebook_id, page_name: str) -> int:
     for idx,item in enumerate(config["notebooks"][notebook_id]["pages"]):
         if item["name"] == page_name + ".md" or item["name"] == page_name:
             return int(item["id"])
+
+def generatePageObject(config, notebook_id, pg_dir):
+    page_obj = {
+        "id": len(config["notebooks"][notebook_id]["pages"]),
+        "name": pg_dir
+    }
+    return page_obj
 
 
 def notebooks(config_file):
